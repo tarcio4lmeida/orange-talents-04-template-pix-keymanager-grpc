@@ -1,0 +1,44 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "br.com.zup.edu.tarcio";
+option java_outer_classname = "KeyManagerGrpc";
+option objc_class_prefix = "HLW";
+
+package br.com.zup.edu.tarcio;
+
+service KeyManagerRegistraService  {
+  rpc registra (RegistraChavePixRequest) returns (RegistraChavePixResponse) {}
+}
+
+enum TipoDeConta {
+  UNKNOWN_TIPO_DE_CONTA = 0;
+  CONTA_CORRENTE = 1;
+  CONTA_POUPANCA = 2;
+}
+
+enum TipoDeChave {
+  UNKNOWN_TIPO_CHAVE = 0;
+  CPF = 1;
+  CNPJ = 2 ;
+  PHONE = 3;
+  EMAIL = 4;
+  RANDOM = 5;
+}
+
+message RegistraChavePixRequest {
+  string clientId = 1;
+  TipoDeChave tipoDeChave = 2;
+  string chave = 3;
+  TipoDeConta tipoDeConta = 4;
+}
+
+message  RegistraChavePixResponse {
+  string clientId = 1;
+  string pixId = 2;
+}
+
+message ErrorDetials{
+  int32 code = 1;
+  string message = 2;
+}

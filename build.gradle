@@ -38,17 +38,18 @@ dependencies {
     testImplementation("org.testcontainers:junit-jupiter")
     testImplementation("org.testcontainers:postgresql")
     testImplementation("org.testcontainers:testcontainers")
+    implementation("io.micronaut:micronaut-http-client")
     implementation("io.micronaut:micronaut-validation")
+    implementation("org.hibernate:hibernate-validator:7.0.1.Final")
 
     runtimeOnly("com.fasterxml.jackson.module:jackson-module-kotlin")
 
     testImplementation("io.micronaut:micronaut-http-client")
-
 }
 
 
 application {
-    mainClass.set("br.com.zup.edu.ApplicationKt")
+    mainClass.set("br.com.zup.edu.tarcio.ApplicationKt")
 }
 java {
     sourceCompatibility = JavaVersion.toVersion("11")
