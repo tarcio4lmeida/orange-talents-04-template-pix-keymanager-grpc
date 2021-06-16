@@ -2,9 +2,9 @@ package br.com.zup.edu.tarcio.pix.register
 
 
 import br.com.zup.edu.tarcio.pix.ChavePix
-import br.com.zup.edu.tarcio.pix.ChavePixExistenteException
 import br.com.zup.edu.tarcio.pix.ChavePixRepository
 import br.com.zup.edu.tarcio.integration.itau.ItauClient
+import br.com.zup.edu.tarcio.pix.ChavePixExistenteException
 import io.micronaut.validation.Validated
 import org.slf4j.LoggerFactory
 import javax.inject.Inject

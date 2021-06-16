@@ -1,9 +1,12 @@
 package br.com.zup.edu.tarcio.pix.register
 
+import br.com.zup.edu.tarcio.DeletaChavePixRequest
 import br.com.zup.edu.tarcio.RegistraChavePixRequest
 import br.com.zup.edu.tarcio.TipoDeChave
 import br.com.zup.edu.tarcio.TipoDeConta
 import br.com.zup.edu.tarcio.pix.TipoChave
+import br.com.zup.edu.tarcio.pix.deleta.DeletaChaveRequest
+import java.util.*
 
 fun RegistraChavePixRequest.toModel(): NovaChavePix {
     return NovaChavePix(
