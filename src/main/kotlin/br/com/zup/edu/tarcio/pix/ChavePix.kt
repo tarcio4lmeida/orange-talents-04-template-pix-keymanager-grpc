@@ -43,7 +43,7 @@ class ChavePix(
     @Id @GeneratedValue
     val id: Long? = null
 
-    val uuid: UUID = UUID.randomUUID()
+    val pixId: UUID = UUID.randomUUID()
 
     @Column(nullable = false)
     val criadaEm: LocalDateTime = LocalDateTime.now()

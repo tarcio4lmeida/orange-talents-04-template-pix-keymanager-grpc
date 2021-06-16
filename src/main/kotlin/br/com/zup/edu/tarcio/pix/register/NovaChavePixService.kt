@@ -26,7 +26,7 @@ class NovaChavePixService(
 
         // 1. Verifica se chave já existe no sistema
         if (repository.existsByChave(novaChave.chave))
-            throw ChavePixExistenteException("Chave Pix '${novaChave.chave}' existente ")
+            throw ChavePixExistenteException("Chave Pix '${novaChave.chave}' existente")
 
         // 2. Busca dados da conta no ERP do Itau
         val response = itauClient.buscaContaPorTipo(
