@@ -8,5 +8,6 @@ class ContaAssociada(
     val nomeDoTitular: String,
     val cpfDoTitular: String,
     val agencia: String,
-    val numeroDaCota: String,
+    val numeroDaConta: String,
+    val ispb: String
 )

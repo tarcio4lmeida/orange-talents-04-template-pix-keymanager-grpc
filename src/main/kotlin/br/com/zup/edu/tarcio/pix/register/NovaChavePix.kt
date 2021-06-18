@@ -1,6 +1,7 @@
 package br.com.zup.edu.tarcio.pix.register
 
 import br.com.zup.edu.tarcio.TipoDeConta
+import br.com.zup.edu.tarcio.integration.bcb.*
 import br.com.zup.edu.tarcio.pix.ChavePix
 import br.com.zup.edu.tarcio.pix.ContaAssociada
 import br.com.zup.edu.tarcio.pix.TipoChave
@@ -29,13 +30,31 @@ data class NovaChavePix(
     val tipoDeConta: TipoDeConta?
 ) {
 
-    fun toModel(conta: ContaAssociada): ChavePix {
+    fun toModel(conta: ContaAssociada, responseBcb: CreatePixKeyResponse): ChavePix {
         return ChavePix(
             clientId = UUID.fromString(this.clientId),
             tipo = TipoChave.valueOf(this.tipo!!.name),
-            chave = if (this.tipo == TipoChave.RANDOM) UUID.randomUUID().toString() else this.chave!!,
+            chave = responseBcb.key,
             tipoDeConta = TipoDeConta.valueOf(this.tipoDeConta!!.name),
             conta = conta
+        )
+    }
+
+    fun toBcbModel(conta: ContaAssociada): CreatePixKeyRequest {
+        return CreatePixKeyRequest(
+            keyType = this.tipo.toString(),
+            key = this.chave!!,  // Verificar como mandar nulo em caso de chave Random
+            bankAccount = BankAccout(
+                participant = conta.ispb,
+                branch = conta.agencia,
+                accountNumber = conta.numeroDaConta,
+                accountType = if (this.tipoDeConta == TipoDeConta.CONTA_CORRENTE) AccountType.CACC else AccountType.SVGS
+            ),
+            owner = Owner(
+                type = OwnerType.NATURAL_PERSON,
+                name = conta.nomeDoTitular,
+                taxIdNumber = conta.cpfDoTitular
+            )
         )
     }
 }

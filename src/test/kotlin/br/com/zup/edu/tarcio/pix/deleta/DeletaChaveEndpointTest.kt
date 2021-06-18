@@ -45,7 +45,8 @@ internal class DeletaChaveEndpointTest(
                     nomeDoTitular = "Rafael M C Ponte",
                     cpfDoTitular = "02467781054",
                     agencia = "0001",
-                    numeroDaCota = "291900",
+                    numeroDaConta = "291900",
+                    ispb = "60701190"
                 )
             )
         )

@@ -43,7 +43,7 @@ dependencies {
     implementation("org.hibernate:hibernate-validator:7.0.1.Final")
 
     runtimeOnly("com.fasterxml.jackson.module:jackson-module-kotlin")
-
+    implementation("io.micronaut.xml:micronaut-jackson-xml")
     testImplementation("io.micronaut:micronaut-http-client")
 
     //Testes

@@ -15,7 +15,8 @@ data class DadosDaContaResponse(
             nomeDoTitular = this.titular.nome,
             cpfDoTitular = this.titular.cpf,
             agencia = this.agencia,
-            numeroDaCota = this.numero,
+            numeroDaConta = this.numero,
+            ispb = this.instituicao.ispb
         )
     }
 }
