@@ -34,6 +34,8 @@ class NovaChavePixService(
             novaChave.clientId!!,
             novaChave.tipoDeConta!!.name
         )
+        check(responseItau.status != HttpStatus.NOT_FOUND) { "Cliente não encontrado no Itaú" }
+        check(responseItau.status == HttpStatus.OK) { "Erro ao buscar dados da conta no Itaú" }
 
         val conta = responseItau.body()!!.toModel()
 

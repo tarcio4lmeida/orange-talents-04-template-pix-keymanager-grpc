@@ -4,6 +4,7 @@ import br.com.zup.edu.tarcio.KeyManagerRegistraServiceGrpc
 import br.com.zup.edu.tarcio.RegistraChavePixRequest
 import br.com.zup.edu.tarcio.TipoDeChave
 import br.com.zup.edu.tarcio.TipoDeConta
+import br.com.zup.edu.tarcio.integration.bcb.*
 import br.com.zup.edu.tarcio.integration.itau.DadosDaContaResponse
 import br.com.zup.edu.tarcio.integration.itau.InstituicaoResponse
 import br.com.zup.edu.tarcio.integration.itau.ItauClient
@@ -23,13 +24,12 @@ import io.micronaut.grpc.server.GrpcServerChannel
 import io.micronaut.http.HttpResponse
 import io.micronaut.test.annotation.MockBean
 import io.micronaut.test.extensions.junit5.annotation.MicronautTest
-import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
-import org.mockito.Mockito
 import org.mockito.Mockito.*
+import java.time.LocalDateTime
 import java.util.*
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -42,10 +42,14 @@ internal class RegistraChaveEndpointTest(
     companion object {
         val CLIENTE_ID = UUID.randomUUID()
     }
+
     @BeforeEach
     internal fun setUp() {
         repository.deleteAll()
     }
+
+    @field:Inject
+    lateinit var bcbClient: BcbClient
 
     @field:Inject
     lateinit var itauClient: ItauClient
@@ -55,6 +59,9 @@ internal class RegistraChaveEndpointTest(
 
         `when`(itauClient.buscaContaPorTipo(CLIENTE_ID.toString(), "CONTA_CORRENTE"))
             .thenReturn(HttpResponse.ok(dadosDaContaResponse()))
+
+        `when`(bcbClient.cadastraChaveBcb(createPixKeyRequest()))
+            .thenReturn(HttpResponse.created(createPixKeyResponse()))
 
         val response = grpcClient.registra(RegistraChavePixRequest.newBuilder()
             .setClientId(CLIENTE_ID.toString())
@@ -138,7 +145,45 @@ internal class RegistraChaveEndpointTest(
         with(error) {
             assertEquals(Status.INVALID_ARGUMENT.code, status.code)
             assertTrue(status.description!!.split(",").contains(" registra.novaChave: chave Pix invalida"))
+            println(status.description!!.split(","))
         }
+    }
+
+    private fun createPixKeyRequest(): CreatePixKeyRequest {
+        return CreatePixKeyRequest(
+            keyType = "EMAIL",
+            key = "teste@email.com",
+            bankAccount = BankAccout(
+                participant = "60701190",
+                branch = "1218",
+                accountNumber = "291900",
+                accountType = AccountType.CACC
+            ),
+            owner = Owner(
+                type = OwnerType.NATURAL_PERSON,
+                name = "Rafael Ponte",
+                taxIdNumber = "63657520325"
+            )
+        )
+    }
+
+    private fun createPixKeyResponse() : CreatePixKeyResponse {
+        return CreatePixKeyResponse(
+            keyType = "EMAIL",
+            key = "teste@email.com",
+            bankAccount = BankAccout(
+                participant = "60701190",
+                branch = "0001",
+                accountNumber = "291900",
+                accountType = AccountType.CACC
+            ),
+            owner = Owner(
+                type = OwnerType.NATURAL_PERSON,
+                name = "Rafael M C Ponte",
+                taxIdNumber = "02467781054"
+            ),
+            createdAt = LocalDateTime.now()
+        )
     }
 
     private fun dadosDaContaResponse(): DadosDaContaResponse {
@@ -154,6 +199,11 @@ internal class RegistraChaveEndpointTest(
     @MockBean(ItauClient::class)
     fun itauClientMock(): ItauClient {
         return mock(ItauClient::class.java)
+    }
+
+    @MockBean(BcbClient::class)
+    fun bcbClientMock(): BcbClient {
+        return mock(BcbClient::class.java)
     }
 
     @Factory
