@@ -1,6 +1,5 @@
 package br.com.zup.edu.tarcio.pix
 
-import br.com.zup.edu.tarcio.TipoDeConta
 
 import java.time.LocalDateTime
 import java.util.*
@@ -24,7 +23,7 @@ class ChavePix(
     @field:NotNull
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    val tipo: TipoChave,
+    val tipo: TipoDeChave,
 
     @field:NotBlank
     @Column(unique = true, nullable = false)
@@ -47,4 +46,21 @@ class ChavePix(
 
     @Column(nullable = false)
     val criadaEm: LocalDateTime = LocalDateTime.now()
+
+    /**
+    * Verifica se esta chave pertence a este cliente
+    */
+    fun pertenceAo(clientId: UUID) = this.clientId.equals(clientId)
+
+    fun isAleatoria(): Boolean {
+        return tipo == TipoDeChave.RANDOM
+    }
+
+    fun atualiza(chave: String): Boolean {
+        if (isAleatoria()) {
+            this.chave = chave
+            return true
+        }
+        return false
+    }
 }

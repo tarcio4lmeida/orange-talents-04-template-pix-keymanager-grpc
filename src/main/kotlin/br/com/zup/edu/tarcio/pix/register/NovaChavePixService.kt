@@ -2,6 +2,7 @@ package br.com.zup.edu.tarcio.pix.register
 
 
 import br.com.zup.edu.tarcio.integration.bcb.BcbClient
+import br.com.zup.edu.tarcio.integration.bcb.CreatePixKeyRequest
 import br.com.zup.edu.tarcio.pix.ChavePix
 import br.com.zup.edu.tarcio.pix.ChavePixRepository
 import br.com.zup.edu.tarcio.integration.itau.ItauClient
@@ -22,15 +23,17 @@ class NovaChavePixService(
     @Inject val bcbClient: BcbClient
 ) {
 
+    private val logger = LoggerFactory.getLogger((this::class.java))
+
     @Transactional
     fun registra(@Valid novaChave: NovaChavePix): ChavePix {
 
-        // 1. Verifica se chave já existe no sistema
+        // 1. Verifica se chave já existe na API
         if (repository.existsByChave(novaChave.chave))
             throw ChavePixExistenteException("Chave Pix '${novaChave.chave}' existente")
 
         // 2. Busca dados da conta no ERP do Itau
-        val responseItau  = itauClient.buscaContaPorTipo(
+        val responseItau = itauClient.buscaContaPorTipo(
             novaChave.clientId!!,
             novaChave.tipoDeConta!!.name
         )
@@ -39,14 +42,17 @@ class NovaChavePixService(
 
         val conta = responseItau.body()!!.toModel()
 
-        // 3 Registra a Chave Globalmente no BCB
-        val responseBcb = bcbClient.cadastraChaveBcb(novaChave.toBcbModel(conta))
-        check(responseBcb.status != HttpStatus.UNPROCESSABLE_ENTITY) { "Chave Pix já cadastrada no BCB" }
-        check(responseBcb.status == HttpStatus.CREATED) { "Não foi possivel cadastrar chave no BCB" }
-
-        // 4 Grava no banco de dados
-        val chave = novaChave.toModel(conta, responseBcb.body()!!)
+        val chave = novaChave.toModel(conta)
         repository.save(chave)
+
+        // 3 Registra a Chave Globalmente no BCB
+        val bcbResponse = bcbClient.cadastraChaveBcb(CreatePixKeyRequest.of(chave)) // 1
+        check(bcbResponse.status != HttpStatus.UNPROCESSABLE_ENTITY) { "Chave Pix já cadastrada no BCB" }
+        check(bcbResponse.status == HttpStatus.CREATED) { "Não foi possivel cadastrar chave no BCB" }
+
+        repository.save(chave)
+
+        chave.atualiza(bcbResponse.body()!!.key)
 
         return chave
     }

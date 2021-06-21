@@ -2,17 +2,12 @@ package br.com.zup.edu.tarcio.pix.register
 
 import br.com.zup.edu.tarcio.KeyManagerRegistraServiceGrpc
 import br.com.zup.edu.tarcio.RegistraChavePixRequest
-import br.com.zup.edu.tarcio.TipoDeChave
-import br.com.zup.edu.tarcio.TipoDeConta
 import br.com.zup.edu.tarcio.integration.bcb.*
 import br.com.zup.edu.tarcio.integration.itau.DadosDaContaResponse
 import br.com.zup.edu.tarcio.integration.itau.InstituicaoResponse
 import br.com.zup.edu.tarcio.integration.itau.ItauClient
 import br.com.zup.edu.tarcio.integration.itau.TitularResponse
-import br.com.zup.edu.tarcio.pix.ChavePix
-import br.com.zup.edu.tarcio.pix.ChavePixRepository
-import br.com.zup.edu.tarcio.pix.ContaAssociada
-import br.com.zup.edu.tarcio.pix.TipoChave
+import br.com.zup.edu.tarcio.pix.*
 import org.junit.jupiter.api.Assertions.*
 
 import io.grpc.ManagedChannel
@@ -65,9 +60,9 @@ internal class RegistraChaveEndpointTest(
 
         val response = grpcClient.registra(RegistraChavePixRequest.newBuilder()
             .setClientId(CLIENTE_ID.toString())
-            .setTipoDeChave(TipoDeChave.EMAIL)
+            .setTipoDeChave(br.com.zup.edu.tarcio.TipoDeChave.EMAIL)
             .setChave("teste@email.com")
-            .setTipoDeConta(TipoDeConta.CONTA_CORRENTE)
+            .setTipoDeConta(br.com.zup.edu.tarcio.TipoDeConta.CONTA_CORRENTE)
             .build())
 
         with(response) {
@@ -82,7 +77,7 @@ internal class RegistraChaveEndpointTest(
         val existente = repository.save(
             ChavePix(
                 clientId = UUID.fromString("c56dfef4-7901-44fb-84e2-a2cefb157890"),
-                tipo = TipoChave.EMAIL,
+                tipo = TipoDeChave.EMAIL,
                 chave = "email@teste.com",
                 tipoDeConta = TipoDeConta.CONTA_CORRENTE,
                 conta = ContaAssociada(
@@ -90,8 +85,7 @@ internal class RegistraChaveEndpointTest(
                     nomeDoTitular = "Rafael M C Ponte",
                     cpfDoTitular = "02467781054",
                     agencia = "0001",
-                    numeroDaConta = "291900",
-                    ispb = "60701190"
+                    numeroDaConta = "291900"
                 )
             )
         )
@@ -99,8 +93,8 @@ internal class RegistraChaveEndpointTest(
         val error = assertThrows<StatusRuntimeException> {
             grpcClient.registra(RegistraChavePixRequest.newBuilder()
                 .setClientId(existente.clientId.toString())
-                .setTipoDeChave(TipoDeChave.EMAIL)
-                .setTipoDeConta(existente.tipoDeConta)
+                .setTipoDeChave(br.com.zup.edu.tarcio.TipoDeChave.EMAIL)
+                .setTipoDeConta(br.com.zup.edu.tarcio.TipoDeConta.CONTA_CORRENTE)
                 .setChave(existente.chave)
                 .build())
         }
@@ -115,9 +109,9 @@ internal class RegistraChaveEndpointTest(
     internal fun `nao deve cadastrar uma nova chave pix quando o cliente nao e encontrado no itau`() {
         val request = RegistraChavePixRequest.newBuilder()
             .setClientId(CLIENTE_ID.toString())
-            .setTipoDeChave(TipoDeChave.EMAIL)
+            .setTipoDeChave(br.com.zup.edu.tarcio.TipoDeChave.EMAIL)
             .setChave("teste@email.com")
-            .setTipoDeConta(TipoDeConta.CONTA_CORRENTE)
+            .setTipoDeConta(br.com.zup.edu.tarcio.TipoDeConta.CONTA_CORRENTE)
             .build()
 
         `when`(itauClient.buscaContaPorTipo(request.clientId, request.tipoDeConta.name))
@@ -151,16 +145,16 @@ internal class RegistraChaveEndpointTest(
 
     private fun createPixKeyRequest(): CreatePixKeyRequest {
         return CreatePixKeyRequest(
-            keyType = "EMAIL",
+            keyType = PixKeyType.EMAIL,
             key = "teste@email.com",
-            bankAccount = BankAccout(
+            bankAccount = BankAccount(
                 participant = "60701190",
                 branch = "1218",
                 accountNumber = "291900",
-                accountType = AccountType.CACC
+                accountType = BankAccount.AccountType.CACC
             ),
             owner = Owner(
-                type = OwnerType.NATURAL_PERSON,
+                type = Owner.OwnerType.NATURAL_PERSON,
                 name = "Rafael Ponte",
                 taxIdNumber = "63657520325"
             )
@@ -169,16 +163,16 @@ internal class RegistraChaveEndpointTest(
 
     private fun createPixKeyResponse() : CreatePixKeyResponse {
         return CreatePixKeyResponse(
-            keyType = "EMAIL",
+            keyType = PixKeyType.EMAIL,
             key = "teste@email.com",
-            bankAccount = BankAccout(
+            bankAccount = BankAccount(
                 participant = "60701190",
                 branch = "0001",
                 accountNumber = "291900",
-                accountType = AccountType.CACC
+                accountType = BankAccount.AccountType.CACC
             ),
             owner = Owner(
-                type = OwnerType.NATURAL_PERSON,
+                type = Owner.OwnerType.NATURAL_PERSON,
                 name = "Rafael M C Ponte",
                 taxIdNumber = "02467781054"
             ),

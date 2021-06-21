@@ -4,14 +4,14 @@ package br.com.zup.edu.tarcio.pix
 import io.micronaut.validation.validator.constraints.EmailValidator
 import org.hibernate.validator.internal.constraintvalidators.hv.br.CPFValidator
 
-enum class TipoChave {
+enum class TipoDeChave {
 
     CPF {
         override fun valida(chave: String?): Boolean {
             if (chave.isNullOrBlank()) {
                 return false
             }
-            if (!chave.matches("^[0-9]{11}\$".toRegex())) {
+            if (!chave.matches("[0-9]+".toRegex())) {
                 return false
             }
 
@@ -45,9 +45,7 @@ enum class TipoChave {
     },
 
     UNKNOWN {
-        override fun valida(chave: String?): Boolean {
-            TODO("Not yet implemented")
-        }
+        override fun valida(chave: String?) = chave.isNullOrBlank() // não deve se preenchida
     };
 
     abstract fun valida(chave: String?): Boolean

@@ -2,14 +2,10 @@ package br.com.zup.edu.tarcio.pix.deleta
 
 import br.com.zup.edu.tarcio.DeletaChavePixRequest
 import br.com.zup.edu.tarcio.KeyManagerDeletaServiceGrpc
-import br.com.zup.edu.tarcio.TipoDeConta
 import br.com.zup.edu.tarcio.integration.bcb.BcbClient
 import br.com.zup.edu.tarcio.integration.bcb.DeletePixKeyRequest
 import br.com.zup.edu.tarcio.integration.bcb.DeletePixKeyResponse
-import br.com.zup.edu.tarcio.pix.ChavePix
-import br.com.zup.edu.tarcio.pix.ChavePixRepository
-import br.com.zup.edu.tarcio.pix.ContaAssociada
-import br.com.zup.edu.tarcio.pix.TipoChave
+import br.com.zup.edu.tarcio.pix.*
 import org.junit.jupiter.api.Assertions.*
 
 import io.grpc.ManagedChannel
@@ -49,7 +45,7 @@ internal class DeletaChaveEndpointTest(
          existente = repository.save(
             ChavePix(
                 clientId = CLIENT_ID,
-                tipo = TipoChave.EMAIL,
+                tipo = TipoDeChave.EMAIL,
                 chave = "email@teste.com",
                 tipoDeConta = TipoDeConta.CONTA_CORRENTE,
                 conta = ContaAssociada(
@@ -57,8 +53,7 @@ internal class DeletaChaveEndpointTest(
                     nomeDoTitular = "Rafael M C Ponte",
                     cpfDoTitular = "02467781054",
                     agencia = "0001",
-                    numeroDaConta = "291900",
-                    ispb = "60701190"
+                    numeroDaConta = "291900"
                 )
             )
         )
@@ -81,8 +76,7 @@ internal class DeletaChaveEndpointTest(
         `when`(
             bcbClient.deletaChavePixBcb(
                 DeletePixKeyRequest(
-                    key = existente.tipoDeConta.toString(),
-                    participant = existente.conta.ispb
+                    key = existente.tipoDeConta.toString()
                 ), existente.chave
             )
         )
@@ -157,8 +151,7 @@ internal class DeletaChaveEndpointTest(
             .build()
 
         val bcbRequest = DeletePixKeyRequest(
-            key = existente.tipoDeConta.toString(),
-            participant = existente.conta.ispb
+            key = existente.tipoDeConta.toString()
         )
 
         `when`(bcbClient.deletaChavePixBcb(bcbRequest, existente.chave))

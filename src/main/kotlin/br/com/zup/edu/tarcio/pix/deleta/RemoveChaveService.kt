@@ -38,16 +38,13 @@ class RemoveChaveService(
             throw PermissaoNegadaException("Cliente não tem permissão para apagar essa chave")
         }
 
-        val request = DeletePixKeyRequest(
-            key = chave.get().tipoDeConta.toString(),
-            participant = chave.get().conta.ispb
-        )
+        val request = DeletePixKeyRequest(chave.get().chave)
 
-        val bcbResponse = bcbClient.deletaChavePixBcb(request, chave.get().chave)
+        val bcbResponse = bcbClient.deletaChavePixBcb(request = request, key = chave.get().chave)
         check(bcbResponse.status != HttpStatus.NOT_FOUND) { "Chave não existe" }
         check(bcbResponse.status != HttpStatus.FORBIDDEN) { "Não foi possivel cadastrar chave no BCB" }
         check(bcbResponse.status == HttpStatus.OK) { "Falha na remoção de chave no BCB" }
 
-        repository.deleteById(chave.get().id)
+        repository.delete(chave.get())
     }
 }
