@@ -131,6 +131,10 @@ internal class RegistraChaveEndpointTest(
     internal fun `nao deve cadastrar uma nova chave pix com dados invalidos`() {
         //vazio
         val request = RegistraChavePixRequest.newBuilder()
+            .setClientId("c56dfef4-7901-44fb-84e2-a2cefb157890")
+            .setTipoDeChave(br.com.zup.edu.tarcio.TipoDeChave.EMAIL)
+            .setChave("testeemail.com")
+            .setTipoDeConta(br.com.zup.edu.tarcio.TipoDeConta.CONTA_CORRENTE)
             .build()
 
         val error = assertThrows<StatusRuntimeException> {
@@ -138,8 +142,8 @@ internal class RegistraChaveEndpointTest(
         }
         with(error) {
             assertEquals(Status.INVALID_ARGUMENT.code, status.code)
-            assertTrue(status.description!!.split(",").contains(" registra.novaChave: chave Pix invalida"))
-            println(status.description!!.split(","))
+            assertEquals("Dados inválidos", status.description)
+
         }
     }
 

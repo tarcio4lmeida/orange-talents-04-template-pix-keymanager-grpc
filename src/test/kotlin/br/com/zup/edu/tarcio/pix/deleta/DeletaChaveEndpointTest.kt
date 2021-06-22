@@ -40,23 +40,17 @@ internal class DeletaChaveEndpointTest(
     @field:Inject
     lateinit var bcbClient: BcbClient
 
+
+
     @BeforeEach
     internal fun setUp() {
          existente = repository.save(
-            ChavePix(
-                clientId = CLIENT_ID,
+            chave(
                 tipo = TipoDeChave.EMAIL,
-                chave = "email@teste.com",
-                tipoDeConta = TipoDeConta.CONTA_CORRENTE,
-                conta = ContaAssociada(
-                    instituicao = "ITAÚ UNIBANCO S.A",
-                    nomeDoTitular = "Rafael M C Ponte",
-                    cpfDoTitular = "02467781054",
-                    agencia = "0001",
-                    numeroDaConta = "291900"
-                )
+                chave = "rponte@gmail.com",
+                clienteId = UUID.randomUUID()
             )
-        )
+         )
     }
 
     @AfterEach
@@ -72,32 +66,28 @@ internal class DeletaChaveEndpointTest(
 
     @Test
     internal fun `deve deletar uma chave pix existente`() {
-
-        `when`(
-            bcbClient.deletaChavePixBcb(
-                DeletePixKeyRequest(
-                    key = existente.tipoDeConta.toString()
-                ), existente.chave
-            )
-        )
-            .thenReturn(
-                HttpResponse.ok(
-                    DeletePixKeyResponse(
-                        key = "email@teste.com",
-                        participant = "60701190",
-                        deletedAt = LocalDateTime.now()
-                    )
-                )
-            )
-
         val request = DeletaChavePixRequest.newBuilder()
             .setClientId(existente.clientId.toString())
             .setPixId(existente.pixId.toString())
             .build()
 
+        val bcbResponse = DeletePixKeyResponse(
+            key = "email@teste.com",
+            participant = "60701190",
+            deletedAt = LocalDateTime.now()
+        )
+        `when`(
+            bcbClient.deletaChavePixBcb(
+                DeletePixKeyRequest(
+                    key = "rponte@gmail.com"
+                ), "rponte@gmail.com"
+            )
+        )
+            .thenReturn(HttpResponse.ok(bcbResponse))
+
         val response = grpcClient.deleta(request)
 
-        assertEquals(CLIENT_ID.toString(), response.clientId.toString())
+        assertEquals(existente.clientId.toString(), response.clientId.toString())
         assertFalse(repository.existsByChave(existente.pixId.toString()))
     }
 
@@ -150,11 +140,13 @@ internal class DeletaChaveEndpointTest(
             .setPixId(existente.pixId.toString())
             .build()
 
-        val bcbRequest = DeletePixKeyRequest(
-            key = existente.tipoDeConta.toString()
+        `when`(
+            bcbClient.deletaChavePixBcb(
+                DeletePixKeyRequest(
+                    key = "rponte@gmail.com"
+                ), "rponte@gmail.com"
+            )
         )
-
-        `when`(bcbClient.deletaChavePixBcb(bcbRequest, existente.chave))
             .thenReturn(HttpResponse.unprocessableEntity())
 
 
@@ -171,6 +163,26 @@ internal class DeletaChaveEndpointTest(
     @MockBean(BcbClient::class)
     fun bcbClientMock(): BcbClient {
         return mock(BcbClient::class.java)
+    }
+
+    private fun chave(
+        tipo: TipoDeChave,
+        chave: String = UUID.randomUUID().toString(),
+        clienteId: UUID = UUID.randomUUID(),
+    ): ChavePix {
+        return ChavePix(
+            clientId = clienteId,
+            tipo = tipo,
+            chave = chave,
+            tipoDeConta = TipoDeConta.CONTA_CORRENTE,
+            conta = ContaAssociada(
+                instituicao = "UNIBANCO ITAU",
+                nomeDoTitular = "Rafael Ponte",
+                cpfDoTitular = "12345678900",
+                agencia = "1218",
+                numeroDaConta = "123456"
+            )
+        )
     }
 
     @Factory

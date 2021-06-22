@@ -16,6 +16,7 @@ class DefaultExceptionHandler : ExceptionHandler<Exception> {
             is ChavePixExistenteException -> Status.ALREADY_EXISTS.withDescription(e.message)
             is ChavePixInexistenteException -> Status.NOT_FOUND.withDescription(e.message)
             is PermissaoNegadaException -> Status.PERMISSION_DENIED.withDescription(e.message)
+
             else -> Status.UNKNOWN.withDescription(e.message)
         }
         return ExceptionHandler.StatusWithDetails(status.withCause(e))
