@@ -42,15 +42,14 @@ class NovaChavePixService(
 
         val conta = responseItau.body()!!.toModel()
 
+        // 3. grava no banco de dados
         val chave = novaChave.toModel(conta)
         repository.save(chave)
 
-        // 3 Registra a Chave Globalmente no BCB
-        val bcbResponse = bcbClient.cadastraChaveBcb(CreatePixKeyRequest.of(chave)) // 1
+        // 4. registra chave no BCB
+        val bcbResponse = bcbClient.cadastraChaveBcb(CreatePixKeyRequest.of(chave))
         check(bcbResponse.status != HttpStatus.UNPROCESSABLE_ENTITY) { "Chave Pix já cadastrada no BCB" }
         check(bcbResponse.status == HttpStatus.CREATED) { "Não foi possivel cadastrar chave no BCB" }
-
-        repository.save(chave)
 
         chave.atualiza(bcbResponse.body()!!.key)
 

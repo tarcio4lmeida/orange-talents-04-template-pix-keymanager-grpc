@@ -3,6 +3,7 @@ package br.com.zup.edu.tarcio.pix.carrega
 import br.com.zup.edu.tarcio.integration.bcb.BcbClient
 import br.com.zup.edu.tarcio.pix.ChavePixInexistenteException
 import br.com.zup.edu.tarcio.pix.ChavePixRepository
+import br.com.zup.edu.tarcio.shared.grpc.ErrorHandler
 import br.com.zup.edu.tarcio.shared.validation.ValidUUID
 import io.micronaut.core.annotation.Introspected
 import io.micronaut.http.HttpStatus
@@ -13,6 +14,7 @@ import javax.validation.constraints.Size
 
 
 @Introspected
+@ErrorHandler
 sealed class Filtro {
 
     /**
